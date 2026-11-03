@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jony Kids — Lidlar | Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<!-- PWA: installable admin app -->
+<meta name="theme-color" content="#1F92FC">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="pwa-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Jony Lidlar">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1F92FC; --blue2:#1472cf; --ink:#17233b; --muted:#6c7a93; --line:#e8eef5;
+    --bg:#f4f7fb; --card:#fff;
+    --inbox:#1F92FC; --think:#FFA703; --no_answer:#9F48FF; --bought:#36B872; --rejected:#e0484b; --archive:#8aa0bd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font-family:inherit}
+  a{color:var(--blue);text-decoration:none}
+  .hidden{display:none!important}
+  ::selection{background:#1F92FC33}
+
+  /* ---------- LOGIN ---------- */
+  #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#eaf4ff,#f4f7fb)}
+  .login-card{width:100%;max-width:400px;background:#fff;border-radius:24px;padding:36px 30px;box-shadow:0 40px 90px -40px rgba(10,30,70,.35)}
+  .login-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:8px}
+  .login-logo img{width:42px;height:42px;border-radius:12px}
+  .login-logo b{font-family:Fredoka,sans-serif;font-weight:600;font-size:20px}
+  .login-sub{text-align:center;color:var(--muted);font-size:14px;margin:0 0 24px}
+  label{display:block;font-size:13px;font-weight:600;color:#53617a;margin-bottom:6px}
+  .inp{width:100%;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-size:15px;outline:none;transition:border-color .15s;background:#fff}
+  .inp:focus{border-color:var(--blue)}
+  .btn{border:none;cursor:pointer;border-radius:13px;font-weight:700;font-size:15px;padding:13px 18px;transition:transform .15s,filter .15s,background .15s}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+  .btn-primary{background:var(--blue);color:#fff;width:100%}
+  .btn-ghost{background:#eef3fa;color:var(--ink)}
+  .btn-sm{padding:9px 14px;font-size:13.5px;border-radius:11px}
+  .err{color:#e0484b;font-size:13.5px;margin-top:12px;min-height:18px}
+
+  /* ---------- APP SHELL ---------- */
+  header.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .top-in{max-width:1240px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img{width:34px;height:34px;border-radius:10px}
+  .brand b{font-family:Fredoka,sans-serif;font-weight:600;font-size:17px}
+  .brand span{color:var(--blue)}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .who{font-size:13px;color:var(--muted);max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  main{max-width:1240px;margin:0 auto;padding:20px}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+  .stat .n{font-family:Fredoka,sans-serif;font-weight:700;font-size:26px;line-height:1}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:5px}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .search{position:relative;flex:1 1 240px;max-width:360px}
+  .search .inp{padding-left:38px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9aa7bd}
+  .spacer{flex:1}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .tab{border:1.5px solid var(--line);background:#fff;color:#53617a;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+  .tab:hover{border-color:#c9d8ea}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab .cnt{background:#eef3fa;color:#53617a;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700}
+  .tab.active .cnt{background:rgba(255,255,255,.22);color:#fff}
+
+  /* ---------- TABLE ---------- */
+  .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead th{text-align:left;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#9aa7bd;font-weight:700;padding:13px 16px;border-bottom:1px solid var(--line);background:#fafcff}
+  tbody td{padding:13px 16px;border-bottom:1px solid #f0f4f9;vertical-align:middle}
+  tbody tr{cursor:pointer;transition:background .12s}
+  tbody tr:hover{background:#f7fbff}
+  tbody tr:last-child td{border-bottom:none}
+  .nm{font-weight:600}
+  .ph{color:#3a4860;white-space:nowrap}
+  .muted{color:var(--muted)}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .empty{padding:50px 20px;text-align:center;color:var(--muted)}
+  .empty .big{font-size:40px;margin-bottom:10px}
+
+  /* ---------- DRAWER ---------- */
+  .drawer-back{position:fixed;inset:0;background:rgba(10,24,45,.45);backdrop-filter:blur(3px);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+  .drawer-back.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:430px;max-width:94vw;background:#fff;z-index:41;box-shadow:-20px 0 60px -20px rgba(10,30,70,.4);transform:translateX(100%);transition:transform .32s cubic-bezier(.22,.9,.3,1);display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
+  .drawer-head .x{margin-left:auto;background:#f1f5fa;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;color:#53617a;flex:none}
+  .drawer-body{padding:20px 22px;overflow-y:auto;flex:1}
+  .field{margin-bottom:16px}
+  .field .k{font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;color:#9aa7bd;font-weight:700;margin-bottom:5px}
+  .field .v{font-size:15px}
+  .contact-row{display:flex;gap:10px;margin:6px 0 20px}
+  .contact-row a{flex:1;text-align:center;border-radius:12px;padding:11px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .c-call{background:#eafaf1;color:#2a8a57}
+  .c-tg{background:#e8f4ff;color:#1278d6}
+  textarea.inp{min-height:84px;resize:vertical}
+  .drawer-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn-danger{background:#fff;color:#e0484b;border:1.5px solid #f3c9ca}
+  .save-ok{font-size:13px;color:#2a8a57;font-weight:600;opacity:0;transition:opacity .2s}
+  .save-ok.show{opacity:1}
+
+  @media (max-width:720px){
+    .hide-sm{display:none}
+    .drawer{width:100%}
+    main{padding:14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginView">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="login-logo"><img src="../assets/logo.webp" alt="Jony Kids"><b>Jony Kids</b></div>
+    <p class="login-sub">Lidlar boshqaruvi — admin kirish</p>
+    <label for="email">Telefon raqam yoki email</label>
+    <input class="inp" id="email" type="text" autocomplete="username" placeholder="+998 __ ___ __ __" style="margin-bottom:16px">
+    <label for="password">Parol</label>
+    <input class="inp" id="password" type="password" autocomplete="current-password" placeholder="••••••••" style="margin-bottom:18px">
+    <button class="btn btn-primary" id="loginBtn" type="submit">Kirish</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="hidden">
+  <header class="top">
+    <div class="top-in">
+      <div class="brand"><img src="../assets/logo.webp" alt=""><b>Jony Kids <span>Lidlar</span></b></div>
+      <div class="top-right">
+        <span class="who hide-sm" id="who"></span>
+        <button class="btn btn-ghost btn-sm" id="adminsBtn">Adminlar</button>
+        <button class="btn btn-ghost btn-sm" id="pwBtn">Parol</button>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">Chiqish</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats" id="stats"></div>
+
+    <div class="controls">
+      <div class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="inp" id="search" type="search" placeholder="Ism yoki telefon bo'yicha qidirish…">
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Yangilash</button>
+      <button class="btn btn-ghost btn-sm" id="exportBtn">⬇ CSV</button>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ism</th><th>Telefon</th><th class="hide-sm">Kurs</th><th class="hide-sm">Sana</th><th>Bosqich</th><th class="hide-sm">Manba</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty hidden" id="emptyState"><div class="big">📭</div><div id="emptyText">Hali lid yo'q.</div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ DRAWER ============ -->
+<div class="drawer-back" id="drawerBack"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div>
+      <div id="dName" style="font-family:Fredoka,sans-serif;font-weight:600;font-size:20px"></div>
+      <div id="dWhen" class="muted" style="font-size:13px;margin-top:3px"></div>
+    </div>
+    <button class="x" id="drawerClose" aria-label="Yopish">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="contact-row">
+      <a id="dCall" class="c-call" href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1l-2.2 2.2z"/></svg> Qo'ng'iroq</a>
+      <a id="dTg" class="c-tg" target="_blank" rel="noopener" href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> Telegram</a>
+    </div>
+
+    <div class="field"><div class="k">Telefon</div><div class="v" id="dPhone"></div></div>
+    <div class="field"><div class="k">Kurs</div><div class="v" id="dCourse"></div></div>
+    <div class="field"><div class="k">Manba</div><div class="v" id="dSource"></div></div>
+
+    <div class="field">
+      <div class="k">Bosqich</div>
+      <select class="inp" id="dStage"></select>
+    </div>
+
+    <div class="field">
+      <div class="k">Izoh / eslatma</div>
+      <textarea class="inp" id="dNote" placeholder="Menejer eslatmasi…"></textarea>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-primary btn-sm" id="dSave" style="width:auto;padding-left:22px;padding-right:22px">Saqlash</button>
+    <span class="save-ok" id="dSaved">✓ Saqlandi</span>
+    <span class="spacer"></span>
+    <button class="btn btn-danger btn-sm" id="dDelete">O'chirish</button>
+  </div>
+</aside>
+
+<!-- ============ ADMINS MODAL ============ -->
+<div id="adminsModal" class="hidden" style="position:fixed;inset:0;z-index:70;background:rgba(10,24,45,.55);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto">
+  <div style="width:100%;max-width:560px;background:#fff;border-radius:20px;padding:24px;box-shadow:0 40px 90px -40px rgba(10,30,70,.5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <b style="font-family:Fredoka,sans-serif;font-size:20px">Adminlar</b>
+      <button class="btn btn-ghost btn-sm" id="adminsClose" type="button">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 16px">Yangi admin qo'shish, tahrirlash yoki o'chirish. Har bir admin <b>telefon raqami va parol</b> bilan kiradi.</p>
+    <div style="background:#f4f7fb;border-radius:14px;padding:14px;margin-bottom:18px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">➕ Yangi admin</div>
+      <input class="inp" id="naName" placeholder="Ism" style="margin-bottom:8px">
+      <input class="inp" id="naPhone" placeholder="Telefon (+998 __ ___ __ __)" style="margin-bottom:8px">
+      <input class="inp" id="naPass" type="text" placeholder="Parol (kamida 6 belgi)" style="margin-bottom:10px">
+      <button class="btn btn-primary btn-sm" id="naAdd" type="button">Qo'shish</button>
+      <div class="err" id="naErr" style="margin-top:6px"></div>
+    </div>
+    <div id="adminsList"></div>
+  </div>
+</div>
+
+<script src="../assets/supabase.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var SB_URL  = 'https://evppaopldyrwywdcsbdg.supabase.co';
+  var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cHBhb3BsZHlyd3l3ZGNzYmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1NzI2NjYsImV4cCI6MjEwNDE0ODY2Nn0.sSeCG54kgo5-AyaafpdksW8Fzg71gdnvRqfAu0z7mPA';
+  var sb = window.supabase.createClient(SB_URL, SB_ANON, { auth:{ persistSession:true, autoRefreshToken:true } });
+
+  var $ = function(s,r){return (r||document).querySelector(s);};
+  var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+  var STAGES = [
+    { key:'inbox',     label:'Inbox',                        color:'var(--inbox)' },
+    { key:'think',     label:"Qayta qo'ng'iroq (o'ylaydi)",  color:'var(--think)' },
+    { key:'no_answer', label:"Qayta qo'ng'iroq (ko'tarmadi)",color:'var(--no_answer)' },
+    { key:'bought',    label:'Sotib oldi',                   color:'var(--bought)' },
+    { key:'rejected',  label:'Rad etdi',                     color:'var(--rejected)' },
+    { key:'archive',   label:'Arxiv',                        color:'var(--archive)' }
+  ];
+  var stageMap = {}; STAGES.forEach(function(s){ stageMap[s.key]=s; });
+
+  var leads = [];        // all leads
+  var filterStage = 'all';
+  var searchQ = '';
+  var current = null;    // lead open in drawer
+
+  /* ---------------- AUTH ---------------- */
+  var loginView = $('#loginView'), appView = $('#appView');
+
+  function showApp(user){
+    /* only ACTIVE admins may enter — kicks out removed/deactivated accounts */
+    sb.rpc('jk_is_admin').then(function(r){
+      if(r.error || r.data !== true){
+        sb.auth.signOut().then(function(){ showLogin("Sizda ruxsat yo'q yoki hisob o'chirilgan."); });
+        return;
+      }
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      $('#who').textContent = adminLabel(user);
+      loadLeads();
+    });
+  }
+  function adminLabel(user){
+    var m = user && user.user_metadata || {};
+    if(m.name) return m.name;
+    if(m.phone) return m.phone;
+    var e = (user && user.email) || '';
+    return e.indexOf('@jony.admin')>=0 ? ('+'+e.split('@')[0]) : e;
+  }
+  function showLogin(msg){
+    appView.classList.add('hidden');
+    loginView.classList.remove('hidden');
+    if(msg) $('#loginErr').textContent = msg;
+  }
+
+  $('#loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = $('#loginBtn'); var err = $('#loginErr'); err.textContent='';
+    var raw = $('#email').value.trim(), pw = $('#password').value;
+    if(!raw || !pw){ err.textContent='Telefon/email va parolni kiriting.'; return; }
+    /* phone-like input → internal synthetic email (<digits>@jony.admin); email passes through */
+    var ident = raw;
+    if(/^[+\d][\d\s()\-]*$/.test(raw) && raw.replace(/\D/g,'').length >= 7){ ident = raw.replace(/\D/g,'') + '@jony.admin'; }
+    btn.textContent='Kirilmoqda…'; btn.disabled=true;
+    sb.auth.signInWithPassword({ email:ident, password:pw }).then(function(res){
+      btn.textContent='Kirish'; btn.disabled=false;
+      if(res.error){ err.textContent = 'Telefon/email yoki parol xato.'; return; }
+      $('#password').value='';
+      showApp(res.data.user);
+    });
+  });
+
+  $('#logoutBtn').addEventListener('click', function(){
+    sb.auth.signOut().then(function(){ leads=[]; showLogin(); });
+  });
+
+  $('#pwBtn').addEventListener('click', function(){
+    var np = prompt('Yangi parol kiriting (kamida 6 belgi):');
+    if(np==null) return;
+    if(np.length<6){ alert('Parol kamida 6 belgi bo\'lishi kerak.'); return; }
+    sb.auth.updateUser({ password: np }).then(function(res){
+      if(res.error){ alert('Xatolik: '+res.error.message); }
+      else { alert('Parol muvaffaqiyatli yangilandi ✅'); }
+    });
+  });
+
+  /* ---------------- ADMINS (add / edit / remove) ---------------- */
+  var adminsModal = $('#adminsModal');
+  function aesc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtPhone(e){ return (e && e.indexOf('@jony.admin')>=0) ? ('+'+e.split('@')[0]) : (e||''); }
+  function loadAdmins(){
+    var box = $('#adminsList'); box.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:10px">Yuklanmoqda…</div>';
+    sb.rpc('jk_admin_list').then(function(res){
+      if(res.error){ box.innerHTML = '<div class="err">Ro\'yxatni yuklab bo\'lmadi: '+aesc(res.error.message)+'</div>'; return; }
+      var rows = res.data || [];
+      box.innerHTML = rows.map(function(a){
+        var label = aesc(a.name || a.phone || fmtPhone(a.email) || 'Admin');
+        var sub = aesc(a.phone || fmtPhone(a.email) || '');
+        var actions = '<button class="btn btn-ghost btn-sm" data-aedit="'+a.user_id+'" type="button">Tahrir</button>'
+          + (a.is_self ? '<span style="color:var(--muted);font-size:12px;margin-left:8px">(siz)</span>'
+                       : '<button class="btn btn-ghost btn-sm" data-arem="'+a.user_id+'" type="button" style="color:#e0484b;margin-left:6px">O\'chirish</button>');
+        return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line)">'
+          + '<div style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+label+'</div><div style="color:var(--muted);font-size:12.5px">'+sub+'</div></div>'
+          + '<div style="white-space:nowrap">'+actions+'</div></div>';
+      }).join('') || '<div style="color:var(--muted);padding:10px">Admin yo\'q.</div>';
+    });
+  }
+  function openAdmins(){ $('#naName').value=''; $('#naPhone').value=''; $('#naPass').value=''; $('#naErr').textContent=''; adminsModal.classList.remove('hidden'); loadAdmins(); }
+  $('#adminsBtn').addEventListener('click', openAdmins);
+  $('#adminsClose').addEventListener('click', function(){ adminsModal.classList.add('hidden'); });
+  adminsModal.addEventListener('click', function(e){ if(e.target===adminsModal) adminsModal.classList.add('hidden'); });
+
+  $('#naAdd').addEventListener('click', function(){
+    var name=$('#naName').value.trim(), phone=$('#naPhone').value.trim(), pass=$('#naPass').value;
+    var er=$('#naErr'); er.textContent='';
+    if(!name || !phone || !pass){ er.textContent='Ism, telefon va parolni kiriting.'; return; }
+    if(phone.replace(/\D/g,'').length<7){ er.textContent='Telefon raqam noto\'g\'ri.'; return; }
+    if(pass.length<6){ er.textContent='Parol kamida 6 belgi bo\'lsin.'; return; }
+    var btn=$('#naAdd'); btn.disabled=true; btn.textContent='Qo\'shilmoqda…';
+    sb.rpc('jk_admin_add',{ p_phone:phone, p_password:pass, p_name:name }).then(function(res){
+      btn.disabled=false; btn.textContent='Qo\'shish';
+      if(res.error){ er.textContent = (res.error.message||'').indexOf('phone_exists')>=0 ? 'Bu telefon allaqachon ro\'yxatda.' : ('Xatolik: '+res.error.message); return; }
+      $('#naName').value=''; $('#naPhone').value=''; $('#naPass').value='';
+      er.style.color='#2a8a57'; er.textContent='Admin qo\'shildi ✅'; setTimeout(function(){ er.textContent=''; er.style.color=''; },2500);
+      loadAdmins();
+    });
+  });
+
+  $('#adminsList').addEventListener('click', function(e){
+    var ed=e.target.closest('[data-aedit]'), rm=e.target.closest('[data-arem]');
+    if(ed){
+      var id=ed.getAttribute('data-aedit');
+      var name=prompt('Ism:'); if(name===null) return;
+      var phone=prompt('Telefon (+998...):'); if(phone===null) return;
+      var pass=prompt('Yangi parol (bo\'sh qoldirsangiz — o\'zgarmaydi):'); if(pass===null) return;
+      if(pass && pass.length<6){ alert('Parol kamida 6 belgi bo\'lishi kerak.'); return; }
+      sb.rpc('jk_admin_edit',{ p_user_id:id, p_phone:phone, p_name:name, p_password:pass||'' }).then(function(res){
+        if(res.error){ alert('Xatolik: '+res.error.message); } else { loadAdmins(); }
+      });
+    } else if(rm){
+      var rid=rm.getAttribute('data-arem');
+      if(!confirm('Bu adminni o\'chirasizmi? U endi tizimga kira olmaydi.')) return;
+      sb.rpc('jk_admin_remove',{ p_user_id:rid }).then(function(res){
+        if(res.error){ var m=res.error.message||''; alert(m.indexOf('last_admin')>=0?'Oxirgi adminni o\'chirib bo\'lmaydi.':m.indexOf('cannot_delete_self')>=0?'O\'zingizni o\'chira olmaysiz.':('Xatolik: '+m)); }
+        else { loadAdmins(); }
+      });
+    }
+  });
+
+  /* ---------------- DATA ---------------- */
+  function loadLeads(){
+    sb.from('jk_leads').select('*').order('created_at',{ascending:false}).then(function(res){
+      if(res.error){ console.error(res.error); renderEmpty("Ma'lumotni yuklashda xatolik. Qayta kiring."); return; }
+      leads = res.data || [];
+      render();
+    });
+  }
+
+  function updateLead(id, patch){
+    return sb.from('jk_leads').update(patch).eq('id', id).select().then(function(res){
+      if(res.error){ throw res.error; }
+      var row = res.data && res.data[0];
+      if(row){ for(var i=0;i<leads.length;i++){ if(leads[i].id===id){ leads[i]=row; break; } } }
+      return row;
+    });
+  }
+
+  function deleteLead(id){
+    return sb.from('jk_leads').delete().eq('id', id).then(function(res){
+      if(res.error){ throw res.error; }
+      leads = leads.filter(function(l){ return l.id!==id; });
+    });
+  }
+
+  /* ---------------- RENDER ---------------- */
+  function fmtDate(iso){
+    var d = new Date(iso);
+    var p = function(n){ return (n<10?'0':'')+n; };
+    return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function isToday(iso){ var d=new Date(iso), n=new Date(); return d.getDate()===n.getDate()&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function telHref(p){ return 'tel:'+String(p||'').replace(/[^0-9+]/g,''); }
+  function tgHref(p){ var d=String(p||'').replace(/[^0-9]/g,''); return 'https://t.me/+'+d; }
+
+  function badge(stageKey){
+    var s = stageMap[stageKey] || stageMap.inbox;
+    return '<span class="badge" style="background:'+s.color+'1a;color:'+s.color+'"><span class="dot" style="background:'+s.color+'"></span>'+esc(s.label)+'</span>';
+  }
+
+  function render(){
+    // stats
+    var total = leads.length;
+    var today = leads.filter(function(l){ return isToday(l.created_at); }).length;
+    var byStage = {}; STAGES.forEach(function(s){ byStage[s.key]=0; });
+    leads.forEach(function(l){ if(byStage[l.stage]!=null) byStage[l.stage]++; });
+
+    var statHtml = ''
+      + '<div class="stat"><div class="n">'+total+'</div><div class="l">Jami lid</div></div>'
+      + '<div class="stat"><div class="n" style="color:var(--blue)">'+today+'</div><div class="l">Bugun</div></div>'
+      + '<div class="stat"><div class="n" style="color:var(--bought)">'+byStage.bought+'</div><div class="l">Sotib oldi</div></div>'
+      + '<div class="stat"><div class="n" style="color:var(--think)">'+(byStage.think+byStage.no_answer)+'</div><div class="l">Qayta qo\'ng\'iroq</div></div>';
+    $('#stats').innerHTML = statHtml;
+
+    // tabs
+    var tabHtml = '<button class="tab'+(filterStage==='all'?' active':'')+'" data-stage="all">Barchasi <span class="cnt">'+total+'</span></button>';
+    STAGES.forEach(function(s){
+      tabHtml += '<button class="tab'+(filterStage===s.key?' active':'')+'" data-stage="'+s.key+'"><span class="dot" style="background:'+s.color+'"></span>'+esc(s.label)+' <span class="cnt">'+byStage[s.key]+'</span></button>';
+    });
+    $('#tabs').innerHTML = tabHtml;
+
+    // rows
+    var q = searchQ.trim().toLowerCase();
+    var list = leads.filter(function(l){
+      if(filterStage!=='all' && l.stage!==filterStage) return false;
+      if(q){ var hay=((l.name||'')+' '+(l.phone||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+
+    var rows = $('#rows'), empty = $('#emptyState');
+    if(!list.length){
+      rows.innerHTML='';
+      empty.classList.remove('hidden');
+      $('#emptyText').textContent = total ? 'Bu filtrda lid topilmadi.' : 'Hali lid yo\'q. Saytdan birinchi ariza kelganda shu yerda paydo bo\'ladi.';
+    } else {
+      empty.classList.add('hidden');
+      rows.innerHTML = list.map(function(l){
+        return '<tr data-id="'+l.id+'">'
+          + '<td class="nm">'+esc(l.name||'—')+'</td>'
+          + '<td class="ph">'+esc(l.phone||'—')+'</td>'
+          + '<td class="hide-sm muted">'+esc(l.course||'—')+'</td>'
+          + '<td class="hide-sm muted">'+fmtDate(l.created_at)+'</td>'
+          + '<td>'+badge(l.stage)+'</td>'
+          + '<td class="hide-sm muted">'+esc(l.source||'—')+'</td>'
+          + '</tr>';
+      }).join('');
+    }
+  }
+
+  function renderEmpty(text){
+    $('#rows').innerHTML='';
+    $('#emptyState').classList.remove('hidden');
+    $('#emptyText').textContent = text;
+  }
+
+  /* ---------------- DRAWER ---------------- */
+  var drawer = $('#drawer'), drawerBack = $('#drawerBack');
+  function openDrawer(lead){
+    current = lead;
+    $('#dName').textContent = lead.name || '—';
+    $('#dWhen').textContent = fmtDate(lead.created_at);
+    $('#dPhone').textContent = lead.phone || '—';
+    $('#dCourse').textContent = lead.course || '—';
+    $('#dSource').textContent = lead.source || '—';
+    $('#dCall').href = telHref(lead.phone);
+    $('#dTg').href = tgHref(lead.phone);
+    var sel = $('#dStage');
+    sel.innerHTML = STAGES.map(function(s){ return '<option value="'+s.key+'"'+(s.key===lead.stage?' selected':'')+'>'+esc(s.label)+'</option>'; }).join('');
+    $('#dNote').value = lead.note || '';
+    $('#dSaved').classList.remove('show');
+    drawer.classList.add('open'); drawerBack.classList.add('open'); drawer.setAttribute('aria-hidden','false');
+  }
+  function closeDrawer(){ drawer.classList.remove('open'); drawerBack.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); current=null; }
+  $('#drawerClose').addEventListener('click', closeDrawer);
+  drawerBack.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDrawer(); });
+
+  // quick stage change from drawer select (auto-save)
+  $('#dStage').addEventListener('change', function(){
+    if(!current) return;
+    var id=current.id, stage=this.value;
+    updateLead(id, { stage:stage }).then(function(row){ if(row) current=row; render(); }).catch(function(e){ console.error(e); alert('Saqlashda xatolik.'); });
+  });
+
+  $('#dSave').addEventListener('click', function(){
+    if(!current) return;
+    var id=current.id;
+    updateLead(id, { stage:$('#dStage').value, note:$('#dNote').value }).then(function(row){
+      if(row) current=row; render();
+      var ok=$('#dSaved'); ok.classList.add('show'); setTimeout(function(){ ok.classList.remove('show'); },1800);
+    }).catch(function(e){ console.error(e); alert('Saqlashda xatolik.'); });
+  });
+
+  $('#dDelete').addEventListener('click', function(){
+    if(!current) return;
+    if(!confirm('Bu lidni butunlay o\'chirmoqchimisiz?')) return;
+    var id=current.id;
+    deleteLead(id).then(function(){ closeDrawer(); render(); }).catch(function(e){ console.error(e); alert('O\'chirishda xatolik.'); });
+  });
+
+  $('#rows').addEventListener('click', function(e){
+    var tr = e.target.closest('tr'); if(!tr) return;
+    var id = tr.getAttribute('data-id');
+    var lead = leads.filter(function(l){ return String(l.id)===String(id); })[0];
+    if(lead) openDrawer(lead);
+  });
+
+  /* ---------------- CONTROLS ---------------- */
+  $('#tabs').addEventListener('click', function(e){
+    var t = e.target.closest('.tab'); if(!t) return;
+    filterStage = t.getAttribute('data-stage'); render();
+  });
+  var searchTimer=null;
+  $('#search').addEventListener('input', function(){
+    var v=this.value; clearTimeout(searchTimer);
+    searchTimer=setTimeout(function(){ searchQ=v; render(); }, 160);
+  });
+  $('#refreshBtn').addEventListener('click', loadLeads);
+
+  $('#exportBtn').addEventListener('click', function(){
+    var q = searchQ.trim().toLowerCase();
+    var list = leads.filter(function(l){
+      if(filterStage!=='all' && l.stage!==filterStage) return false;
+      if(q){ var hay=((l.name||'')+' '+(l.phone||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+    var head = ['Sana','Ism','Telefon','Kurs','Bosqich','Manba','Izoh'];
+    var cell = function(v){ v=(v==null?'':String(v)); return '"'+v.replace(/"/g,'""')+'"'; };
+    var lines = [head.map(cell).join(',')];
+    list.forEach(function(l){
+      lines.push([ fmtDate(l.created_at), l.name, l.phone, l.course, (stageMap[l.stage]||{}).label||l.stage, l.source, l.note ].map(cell).join(','));
+    });
+    var blob = new Blob(['﻿'+lines.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+    var a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download = 'jony-kids-lidlar-'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+
+  // auto-refresh every 45s when tab visible
+  setInterval(function(){ if(!document.hidden && !appView.classList.contains('hidden')) loadLeads(); }, 45000);
+
+  /* ---------------- BOOT ---------------- */
+  sb.auth.getSession().then(function(res){
+    var session = res.data && res.data.session;
+    if(session && session.user){ showApp(session.user); }
+    else { showLogin(); }
+  });
+})();
+</script>
+<script>
+/* PWA: register the service worker so the admin panel is installable + works offline */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Maxfiy kalitlar / tokenlar — HECH QACHON GitHubga yuborilmaydi
+.env*
+.vercel
+.claude/
+
+# Xom (siqilmagan) natija videolari — juda katta, GitHub 100MB limitidan oshadi
+natija videolar/
+*.MP4
+*.MOV
+
+# Tizim fayllari
+node_modules/
+.DS_Store
+Thumbs.db

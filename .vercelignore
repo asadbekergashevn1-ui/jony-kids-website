@@ -1,0 +1,10 @@
+# deploy faqat sayt fayllarini: index.html, assets/, lidlar/
+.claude/
+*.md
+94_2.png
+28ab6421-7ab2-4051-b34f-74294464b391_removalai_preview.png
+Yasin_11_logo-remove (1).svg
+Curious Boy in Blue Shirt.png
+# xom (siqilmagan) natija videolari — faqat assets/videos/ dagi siqilganlari deploy bo'ladi
+natija videolar/
+Ota-onalar fikri images/
